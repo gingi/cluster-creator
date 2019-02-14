@@ -1,0 +1,18 @@
+.ClusterSection-label {
+    font-size: 1.5em;
+    font-weight: 200;
+}
+.ClusterSection-content {
+    padding: 1em;
+    position: relative;
+    min-height: 80px;
+}
+.ClusterSection-value {
+    font-weight: bold;
+}
+.ClusterSection-edit {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 1em;
+}
