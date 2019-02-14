@@ -1,11 +1,12 @@
 import * as React from "react";
 
-import { IconButton, Panel, PanelType } from "office-ui-fabric-react";
+import { IconButton } from "office-ui-fabric-react";
 
 import { initializeIcons } from "@uifabric/icons";
 initializeIcons();
 
 import "./ClusterSection.css";
+import ClusterSectionEditor from "./ClusterSectionEditor";
 
 
 export interface IClusterSectionProps {
@@ -44,9 +45,8 @@ extends React.Component<IClusterSectionProps, IClusterSectionState> {
                         (detail, i) => <div key={`detail-${i}`}
                             className="ClusterSection-detail">{detail}</div>)}
                 </div>
-                <Panel
+                <ClusterSectionEditor
                     isOpen={this.state.showEditPanel}
-                    type={PanelType.smallFixedFar}
                     onDismiss={this.closeEditPanel}
                     headerText={`Edit ${this.props.name}`} />
             </div>
