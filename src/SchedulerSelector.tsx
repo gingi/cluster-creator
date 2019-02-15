@@ -1,35 +1,10 @@
 import * as React from "react";
-
+import { Component } from "react";
 import ListSelector from "./ListSelector";
+import Schedulers from "./models/Schedulers";
 
-const SCHEDULERS = [
-    {
-        id: "uge",
-        label: "Univa Grid Engine",
-        name: "UGE",
-        version: "6.2u8"
-    },
-    {
-        id: "pbspro",
-        label: "Altair PBS Professional",
-        name: "PBSPro",
-        version: "19.1.1"
-    },
-    {
-        id: "slurm",
-        label: "SchedMD Slurm Workload Manager",
-        name: "Slurm",
-        version: "18.08"
-    },
-    {
-        id: "lsf",
-        label: "IBM Spectrum LSF",
-        name: "LSF",
-        version: "10.1.0"
-    }
-];
 
-export default class SchedulerSelector extends React.Component {
+export default class SchedulerSelector extends Component {
     constructor(props: any) {
         super(props);
         this.onSelectionChanged = this.onSelectionChanged.bind(this);
@@ -37,7 +12,7 @@ export default class SchedulerSelector extends React.Component {
     public render() {
         return (
             <ListSelector
-                items={SCHEDULERS}
+                items={Schedulers}
                 detailRenderer={this.detailRenderer}
                 selectedIndex={1}
                 onSelectionChanged={this.onSelectionChanged}
