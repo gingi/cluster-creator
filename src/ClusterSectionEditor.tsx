@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { Panel, PanelType } from "office-ui-fabric-react";
+import SchedulerSelector from "./SchedulerSelector";
 
 export interface IClusterSectionEditorProps {
     isOpen: boolean;
@@ -16,7 +17,9 @@ extends React.Component<IClusterSectionEditorProps, {}> {
                 isOpen={this.props.isOpen}
                 type={PanelType.smallFixedFar}
                 onDismiss={this.props.onDismiss}
-                headerText={this.props.headerText} />
+                headerText={this.props.headerText}>
+                <SchedulerSelector />
+            </Panel>
         );
     }
 }

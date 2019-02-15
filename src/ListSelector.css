@@ -1,0 +1,19 @@
+.List-itemCell {
+    padding: 1em;
+    display: flex;
+}
+.List-itemCell:hover {
+    background-color: #eee;
+}
+.List-itemCell-checkbox {
+    padding: 0.5em;
+}
+.List-itemCell-header {
+    font-weight: bold;
+}
+.List-itemCell-details {
+    color: #595959;
+}
+.List-itemCell:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
