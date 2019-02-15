@@ -7,6 +7,8 @@ type IRenderer = (item: any) => string;
 export interface IListSelectorProps {
     items: any[];
     detailRenderer: IRenderer;
+    selectedIndex?: number;
+    onSelectionChanged?: (index: number) => void;
 }
 
 interface IListSelectorState {
@@ -43,16 +45,26 @@ const ListSelectorCell:
 
 export default class ListSelector
 extends React.Component<IListSelectorProps, IListSelectorState> {
+    private hasMounted = false;
+
     constructor(props: IListSelectorProps) {
         super(props);
+        this.onSelectionChanged = this.onSelectionChanged.bind(this);
         this.state = {
             selection: new Selection({
-                onSelectionChanged: () => this.forceUpdate(),
+                onSelectionChanged: this.onSelectionChanged,
                 selectionMode: SelectionMode.single
             })
         };
 
         this.state.selection.setItems(props.items, false);
+        if (props.selectedIndex === undefined) {
+            props.selectedIndex = 0;
+        }
+        this.state.selection.setIndexSelected(props.selectedIndex, true, true);
+    }
+    public componentDidMount() {
+        this.hasMounted = true;
     }
     public render() {
         const { selection } = this.state;
@@ -68,5 +80,15 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
                 )}
             </SelectionZone>
         );
+    }
+    private onSelectionChanged() {
+        if (!this.hasMounted) {
+            return;
+        }
+        this.forceUpdate();
+        if (this.props.onSelectionChanged) {
+            const index = this.state.selection.getSelectedIndices()[0];
+            this.props.onSelectionChanged(index);
+        }
     }
 }
