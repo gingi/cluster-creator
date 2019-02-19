@@ -9,7 +9,7 @@ export interface IClusterSectionEditorProps {
     headerText: string;
 }
 
-export default function ClusterSectionEditor(WrappedEditor: any) {
+export default function createEditor(WrappedEditor: any) {
     return class Editor extends Component<IClusterSectionEditorProps, {}> {
         public render() {
             return (

@@ -1,11 +1,12 @@
+import MachineTypes from "./MachineTypes";
 import Schedulers from "./Schedulers";
 
 const Defaults = {
     defaultComputNodes: [
-        { machineType: "H16R" }
+        { machineType: MachineTypes[1].name }
     ],
     defaultHeadNodes: [
-        { machineType: "DSv3" }
+        { machineType: MachineTypes[2].name }
     ],
     defaultScheduler: Schedulers[0].name,
 }

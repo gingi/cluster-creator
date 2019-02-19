@@ -6,7 +6,8 @@ type IRenderer = (item: any) => string;
 
 export interface IListSelectorProps {
     items: any[];
-    detailRenderer: IRenderer;
+    detailRenderer?: IRenderer;
+    labelRenderer?: IRenderer;
     selectedIndex?: number;
     onSelectionChanged?: (index: number) => void;
 }
@@ -19,13 +20,17 @@ interface IListSelectorCellProps {
     item: any;
     selection: ISelection;
     index: number;
-    detailRenderer: IRenderer;
+    detailRenderer?: IRenderer;
+    labelRenderer?: IRenderer;
 }
 
 const ListSelectorCell:
     React.StatelessComponent<IListSelectorCellProps> =
 (props: IListSelectorCellProps) => {
-    const detail = props.detailRenderer(props.item);
+    const detail = props.detailRenderer ?
+        props.detailRenderer(props.item) : null;
+    const label = props.labelRenderer ?
+        props.labelRenderer(props.item) : props.item.label;
     const isSelected = props.selection.isIndexSelected(props.index);
     return (
         <div className="List-itemCell"
@@ -36,8 +41,10 @@ const ListSelectorCell:
                 <Check checked={isSelected}/>
             </div>
             <div className="List-itemCell-content" data-selection-select={true}>
-                <div className="List-itemCell-header">{props.item.label}</div>
-                <div className="List-itemCell-detail">{detail}</div>
+                <div className="List-itemCell-header">{label}</div>
+                {detail &&
+                    <div className="List-itemCell-detail">{detail}</div>
+                }
             </div>
         </div>
     );
@@ -58,10 +65,11 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
         };
 
         this.state.selection.setItems(props.items, false);
-        if (props.selectedIndex === undefined) {
-            props.selectedIndex = 0;
+        let { selectedIndex } = props;
+        if (typeof selectedIndex === "undefined") {
+            selectedIndex = 0;
         }
-        this.state.selection.setIndexSelected(props.selectedIndex, true, true);
+        this.state.selection.setIndexSelected(selectedIndex, true, true);
     }
     public componentDidMount() {
         this.hasMounted = true;
@@ -76,7 +84,8 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
                         item={item}
                         index={index}
                         selection={selection}
-                        detailRenderer={this.props.detailRenderer}/>
+                        detailRenderer={this.props.detailRenderer}
+                        labelRenderer={this.props.labelRenderer}/>
                 )}
             </SelectionZone>
         );

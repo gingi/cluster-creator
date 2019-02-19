@@ -1,10 +1,9 @@
 import { IconButton } from "office-ui-fabric-react";
 import * as React from "react";
-import { Component } from "react";
+import { useState } from "react";
 import "./ClusterSection.css";
-import ClusterSectionEditor from "./ClusterSectionEditor";
+import createEditor from "./ClusterSectionEditor";
 import Schedulers from "./models/Schedulers";
-import SchedulerSelector from "./SchedulerSelector";
 
 
 export enum ClusterSectionType {
@@ -17,10 +16,8 @@ export interface IClusterSectionProps {
     type: ClusterSectionType;
     value: any;
     details?: string[];
-}
-
-interface IClusterSectionState {
-    showEditPanel: boolean;
+    onSave: () => void;
+    editor?: any;
 }
 
 interface ISectionConfig {
@@ -34,9 +31,9 @@ function findScheduler(name: string) {
     return Schedulers.filter(s => s.name === name)[0];
 }
 
-function getSectionForType(type: ClusterSectionType): ISectionConfig {
+function getSectionForType(props: IClusterSectionProps): ISectionConfig {
     const section: ISectionConfig = {};
-    switch (type) {
+    switch (props.type) {
         case ClusterSectionType.SCHEDULER:
             section.name = "Scheduler";
             section.detailRenderer = (name: string) => {
@@ -55,70 +52,62 @@ function getSectionForType(type: ClusterSectionType): ISectionConfig {
         default:
             section.name = "Undefined";
     }
-    section.Editor = ClusterSectionEditor(SchedulerSelector);
+    section.Editor = createEditor(props.editor);
     return section;
 }
 
-export default class ClusterSection
-extends Component<IClusterSectionProps, IClusterSectionState> {
-    private config: ISectionConfig;
-    constructor(props: IClusterSectionProps) {
-        super(props);
-        this.config = getSectionForType(props.type);
-        this.state = {
-            showEditPanel: false
-        };
-    }
-    public render() {
-        const details = this.getSectionDetails();
-        return (
-            <div className="ClusterSection ms-Grid-col ms-lg4 ms-md6 ms-sm12">
-                <h2 className="ClusterSection-label">{this.config.name}</h2>
-                <div className="ClusterSection-content ms-bgColor-neutralLight">
-                    <div className="ClusterSection-edit">
-                        <IconButton
-                            styles={{ root: { backgroundColor: "transparent" }}}
-                            iconProps={{ iconName: "Edit" }}
-                            aria-label="Edit cluster section"
-                            onClick={this.showEditPanel}/>
-                    </div>
-                    <div className="ClusterSection-value">
-                        {this.renderValue(this.props.value)}
-                    </div>
-                    {details && details.map(
-                        (detail, i) => <div key={`detail-${i}`}
-                            className="ClusterSection-detail">{detail}</div>)}
-                </div>
-                <this.config.Editor
-                    isOpen={this.state.showEditPanel}
-                    onDismiss={this.closeEditPanel}
-                    onSave={this.saveAndCloseEditPanel}
-                    headerText={`Edit ${this.config.name}`}
-                />
-            </div>
-        );
+export default function ClusterSection(props: IClusterSectionProps) {
+    const config: ISectionConfig = getSectionForType(props);
+    const [editPanelShown, toggleEditPanel] = useState(false);
+    const getSectionDetails = () => {
+        if (props.details) {
+            return props.details;
+        }
+        if (config.detailRenderer) {
+            return config.detailRenderer(props.value);
+        }
+        return null;
     }
 
-    private showEditPanel = () => this.setState({ showEditPanel: true });
-    private closeEditPanel = () => this.setState({ showEditPanel: false });
-    private saveAndCloseEditPanel = () => {
-        this.closeEditPanel();
+    const details = getSectionDetails();
+    const showEditPanel = () => toggleEditPanel(true);
+    const hideEditPanel = () => toggleEditPanel(false);
+    const saveAndCloseEditPanel = () => {
+        props.onSave();
+        hideEditPanel();
     };
-
-    private renderValue(value: any) {
-        if (this.config.valueRenderer) {
-            return this.config.valueRenderer(value);
+    const renderValue = (value: any) => {
+        if (config.valueRenderer) {
+            return config.valueRenderer(value);
         }
         return value;
     }
 
-    private getSectionDetails() {
-        if (this.props.details) {
-            return this.props.details;
-        }
-        if (this.config.detailRenderer) {
-            return this.config.detailRenderer(this.props.value);
-        }
-        return null;
-    }
+    return (
+        <div className="ClusterSection ms-Grid-col ms-lg4 ms-md6 ms-sm12">
+            <h2 className="ClusterSection-label">{config.name}</h2>
+            <div className="ClusterSection-content ms-bgColor-neutralLight">
+                <div className="ClusterSection-edit">
+                    <IconButton
+                        styles={{ root: { backgroundColor: "transparent" }}}
+                        iconProps={{ iconName: "Edit" }}
+                        aria-label="Edit cluster section"
+                        onClick={showEditPanel}/>
+                </div>
+                <div className="ClusterSection-value">
+                    {renderValue(props.value)}
+                </div>
+                {details && details.map(
+                    (detail, i) => <div key={`detail-${i}`}
+                        className="ClusterSection-detail">{detail}</div>)}
+            </div>
+            <config.Editor
+                isOpen={editPanelShown}
+                onDismiss={hideEditPanel}
+                onSave={saveAndCloseEditPanel}
+                headerText={`Edit ${config.name}`}
+                value={props.value}
+            />
+        </div>
+    );
 }
