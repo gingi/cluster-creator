@@ -2,11 +2,6 @@
     font-size: 1.5em;
     font-weight: 200;
 }
-.ClusterSection-content {
-    padding: 1em;
-    position: relative;
-    min-height: 80px;
-}
 .ClusterSection-value {
     font-weight: bold;
 }
@@ -15,4 +10,14 @@
     right: 0;
     top: 0;
     padding: 1em;
+}
+.ClusterSection-container {
+    display: flex;
+    padding: 1em;
+    position: relative;
+    min-height: 80px;
+}
+.ClusterSection-icon {
+    font-size: 400%;
+    margin-right: 20px;
 }

@@ -1,4 +1,4 @@
-import { IconButton } from "office-ui-fabric-react";
+import { Icon, IconButton } from "office-ui-fabric-react";
 import * as React from "react";
 import { useState } from "react";
 import "./ClusterSection.css";
@@ -30,10 +30,10 @@ function getSectionHelper(props: IClusterSectionProps): SectionHelper {
             section = new SchedulerSectionHelper(props);
             break;
         case ClusterSectionType.HEAD_NODE:
-            section = new NodeSectionHelper(props, "Head Node");
+            section = new NodeSectionHelper(props, "Head Node", "TVMonitor");
             break;
         case ClusterSectionType.COMPUTE_NODE:
-            section = new NodeSectionHelper(props, "Compute Node");
+            section = new NodeSectionHelper(props, "Compute Node", "Stack");
             break;
         default:
             throw new Error(`No such section type ${props.type}`);
@@ -54,11 +54,17 @@ export default function ClusterSection(props: IClusterSectionProps) {
     };
 
     const Editor = helper.editor();
+    const iconName = helper.icon();
 
     return (
-        <div className="ClusterSection ms-Grid-col ms-lg4 ms-md6 ms-sm12">
+        <div className="ClusterSection ms-Grid-col ms-lg6 ms-md6 ms-sm12">
             <h2 className="ClusterSection-label">{helper.name()}</h2>
-            <div className="ClusterSection-content ms-bgColor-neutralLight">
+            <div className="ClusterSection-container ms-bgColor-neutralLight">
+                {iconName &&
+                    <div className="ClusterSection-icon">
+                        <Icon iconName={iconName} />
+                    </div>
+                }
                 <div className="ClusterSection-edit">
                     <IconButton
                         styles={{ root: { backgroundColor: "transparent" }}}
@@ -66,12 +72,14 @@ export default function ClusterSection(props: IClusterSectionProps) {
                         aria-label="Edit cluster section"
                         onClick={showEditPanel}/>
                 </div>
-                <div className="ClusterSection-value">
-                    {helper.renderValue(props.value)}
+                <div className="ClusterSection-content">
+                    <div className="ClusterSection-value">
+                        {helper.renderValue(props.value)}
+                    </div>
+                    {details.map(
+                        (detail, i) => <div key={`detail-${i}`}
+                            className="ClusterSection-detail">{detail}</div>)}
                 </div>
-                {details.map(
-                    (detail, i) => <div key={`detail-${i}`}
-                        className="ClusterSection-detail">{detail}</div>)}
             </div>
             <Editor
                 isOpen={editPanelShown}
@@ -95,6 +103,7 @@ abstract class SectionHelper {
     public renderValue(value: string) { return value; }
     public editor() { return this.sectionEditor; }
     public abstract name(): string;
+    public icon(): string | undefined { return undefined; }
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -128,9 +137,11 @@ class NodeSectionHelper extends SectionHelper {
         return MachineTypes.filter(mt => mt.name === name)[0];
     }
     private sectionName: string;
-    constructor(props: IClusterSectionProps, name: string) {
+    private sectionIcon: string;
+    constructor(props: IClusterSectionProps, name: string, icon: string) {
         super(props);
         this.sectionName = name;
+        this.sectionIcon = icon;
     }
     public name() { return this.sectionName; }
     public renderValue(node: any) { return node.machineType };
@@ -138,4 +149,5 @@ class NodeSectionHelper extends SectionHelper {
         const machineType = NodeSectionHelper.findMachineType(node.machineType);
         return [ `${machineType.cores} vCPUs`, `${machineType.memory} GB RAM` ];
     }
+    public icon(): string | undefined { return this.sectionIcon; }
 }
