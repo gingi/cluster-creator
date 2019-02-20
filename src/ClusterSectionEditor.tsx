@@ -10,19 +10,31 @@ export interface IClusterSectionEditorProps {
 }
 
 export default function createEditor(WrappedEditor: any) {
-    return class Editor extends Component<IClusterSectionEditorProps, {}> {
+    return class Editor extends Component<IClusterSectionEditorProps> {
+        public state = { changed: false };
         public render() {
+            const { isOpen, onDismiss, headerText, ...extraProps } = this.props;
+            const onSaveEditor = this.onSaveEditor.bind(this);
+            const handleChange = this.handleChange.bind(this);
             return (
                 <Panel
-                    isOpen={this.props.isOpen}
+                    isOpen={isOpen}
                     type={PanelType.smallFixedFar}
-                    onDismiss={this.props.onDismiss}
-                    headerText={this.props.headerText}>
-                    <WrappedEditor />
-                    <PrimaryButton text="Save" onClick={this.onSave}/>
+                    onDismiss={onDismiss}
+                    headerText={headerText}>
+                    <WrappedEditor onChange={handleChange} {...extraProps} />
+                    <PrimaryButton text="Save" onClick={onSaveEditor}/>
                 </Panel>
             );
         }
-        private onSave = () => this.props.onSave()
+
+        private onSaveEditor() {
+            alert("Saved " + this.state.changed);
+            this.props.onSave();
+        }
+
+        private handleChange() {
+            this.setState({ changed: true });
+        }
     }
 }

@@ -8,7 +8,8 @@ export interface IListSelectorProps {
     items: any[];
     detailRenderer?: IRenderer;
     labelRenderer?: IRenderer;
-    selectedIndex?: number;
+    initialValue?: any;
+    itemMatcher?: (value: string, item: any) => boolean;
     onSelectionChanged?: (index: number) => void;
 }
 
@@ -65,10 +66,7 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
         };
 
         this.state.selection.setItems(props.items, false);
-        let { selectedIndex } = props;
-        if (typeof selectedIndex === "undefined") {
-            selectedIndex = 0;
-        }
+        const selectedIndex = this.getInitialIndex(props);
         this.state.selection.setIndexSelected(selectedIndex, true, true);
     }
     public componentDidMount() {
@@ -99,5 +97,20 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
             const index = this.state.selection.getSelectedIndices()[0];
             this.props.onSelectionChanged(index);
         }
+    }
+
+    private getInitialIndex(props: any) {
+        const { initialValue, itemMatcher, items } = props;
+        if (!initialValue) {
+            return 0;
+        }
+        const matches = itemMatcher ? itemMatcher :
+            (value: string, item: any) => value === item;
+        for (let i = 0; i < items.length; i++) {
+            if (matches(initialValue, items[i])) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

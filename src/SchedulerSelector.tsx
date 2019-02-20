@@ -4,7 +4,7 @@ import Schedulers from "./models/Schedulers";
 
 interface ISchedulerSelectorProps {
     value: number;
-    onSave?: () => void;
+    onChange?: (value: any) => void;
 }
 
 export default function SchedulerSelector(props: ISchedulerSelectorProps) {
@@ -12,17 +12,20 @@ export default function SchedulerSelector(props: ISchedulerSelectorProps) {
         return `Version ${item.version}`;
     }
     const onSelectionChanged = (index: number) => {
-        if (props.onSave) {
-            props.onSave();
+        if (props.onChange) {
+            props.onChange(index);
         }
     }
+
+    const itemMatcher = (value: string, item: any) => item.id === value;
 
     return (
         <ListSelector
             items={Schedulers}
             detailRenderer={detailRenderer}
-            selectedIndex={props.value}
+            initialValue={props.value}
             onSelectionChanged={onSelectionChanged}
+            itemMatcher={itemMatcher}
         />
     );
 }

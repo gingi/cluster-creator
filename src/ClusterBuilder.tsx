@@ -1,3 +1,4 @@
+import { DefaultButton, PrimaryButton } from "office-ui-fabric-react";
 import * as React from "react";
 import ClusterSection, { ClusterSectionType } from "./ClusterSection";
 import Cluster from "./models/Cluster";
@@ -15,7 +16,12 @@ export default function ClusterBuilder(props: IClusterBuilderProps) {
     }
 
     const makeClusterSection = (args: any) => {
-        return <ClusterSection {...args} onSave={handleSave} />;
+        return (
+            <ClusterSection
+                {...args}
+                cluster={cluster}
+                onSave={handleSave} />
+        );
     }
 
     return (
@@ -29,10 +35,6 @@ export default function ClusterBuilder(props: IClusterBuilderProps) {
             </div>
             <div className="ms-Grid-row">
                 {makeClusterSection({
-                    details: [
-                        "2 vCPUs",
-                        "Networking [IP Vnet]"
-                    ],
                     editor: NodeEditor,
                     type: ClusterSectionType.HEAD_NODE,
                     value: cluster.headNodes[0],
@@ -44,6 +46,12 @@ export default function ClusterBuilder(props: IClusterBuilderProps) {
                     type: ClusterSectionType.COMPUTE_NODE,
                     value: cluster.computeNodes[0],
                 })}
+            </div>
+            <div className="ms-Grid-row ButtonPanel">
+                <div className="ms-Grid-col">
+                    <PrimaryButton text="Create Cluster" />
+                    <DefaultButton text="Show Template" />
+                </div>
             </div>
         </>
     )
