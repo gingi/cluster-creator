@@ -1,22 +1,44 @@
 import { Action } from "redux";
-import { EDIT_SCHEDULER } from "./actions";
-import Cluster from "./models/Cluster";
+import { Actions } from "./actions";
+import Cluster, { ClusterNodeType, IClusterNode } from "./models/Cluster";
 
-const initialState = {
-    cluster: new Cluster()
-};
+const initialState = { cluster: new Cluster() };
 
+const nodeType = (type: ClusterNodeType): string => {
+    switch (type) {
+        case ClusterNodeType.COMPUTE: return "computeNodes";
+        case ClusterNodeType.HEAD: return "headNodes";
+    }
+}
+
+// tslint:disable: no-string-literal
 const reducers = [
     function clusterCreator(state = initialState, action: Action) {
         switch (action.type) {
-            case EDIT_SCHEDULER:
+            case Actions.EDIT_SCHEDULER:
                 return Object.assign({}, state, {
                     cluster: {
                         ...state.cluster,
-                        // tslint:disable-next-line: no-string-literal
                         ...action["scheduler"]
                     }
                 });
+            case Actions.EDIT_NODE:
+                const nType = nodeType(action["nodeType"]);
+                const nState = Object.assign({}, state, {
+                    cluster: {
+                        ...state.cluster,
+                        [nType]: state.cluster[nType].map(
+                            (node: IClusterNode, index: number) => {
+                                if (index === action["index"]) {
+                                    return Object.assign({}, node,
+                                        action["node"]);
+                                }
+                                return node;
+                            }
+                        )
+                    }
+                });
+                return nState;
             default:
                 return state;
         }

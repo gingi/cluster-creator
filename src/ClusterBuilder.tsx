@@ -1,9 +1,10 @@
-import { DefaultButton, PrimaryButton } from "office-ui-fabric-react";
+import { PrimaryButton } from "office-ui-fabric-react";
 import * as React from "react";
 import { connect } from "react-redux";
-import { editScheduler } from "./actions";
+import { editNode, editScheduler } from "./actions";
 import ClusterSection, { ClusterSectionType } from "./ClusterSection";
-import Cluster from "./models/Cluster";
+import ButtonContainer from "./layout/ButtonContainer";
+import Cluster, { ClusterNodeType, IClusterNode } from "./models/Cluster";
 import NodeEditor from "./NodeEditor";
 import SchedulerSelector from "./SchedulerSelector";
 
@@ -13,21 +14,25 @@ export interface IClusterBuilderProps {
 
 interface IDispatchProps {
     onEditScheduler: (scheduler: string) => void;
+    onEditNode:
+        (node: IClusterNode, type: ClusterNodeType, index: number) => void;
 }
 
 const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) => {
-    const { cluster, onEditScheduler } = props;
+    const { cluster, onEditScheduler, onEditNode } = props;
     const makeClusterSection = (args: any) => {
-        return (
-            <ClusterSection
-                {...args}
-                cluster={cluster} />
-        );
+        return <ClusterSection {...args} cluster={cluster} />;
     }
 
     if (!cluster) {
         return <h3>No cluster defined!</h3>;
     }
+
+    const onEditHeadNode =
+        (node: IClusterNode) => onEditNode(node, ClusterNodeType.HEAD, 0);
+
+    const onEditComputeNode =
+        (node: IClusterNode) => onEditNode(node, ClusterNodeType.COMPUTE, 0);
 
     return (
         <>
@@ -42,6 +47,7 @@ const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) =
             <div className="ms-Grid-row">
                 {makeClusterSection({
                     editor: NodeEditor,
+                    onEdit: onEditHeadNode,
                     type: ClusterSectionType.HEAD_NODE,
                     value: cluster.headNodes[0],
                 })}
@@ -49,16 +55,14 @@ const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) =
             <div className="ms-Grid-row">
                 {makeClusterSection({
                     editor: NodeEditor,
+                    onEdit: onEditComputeNode,
                     type: ClusterSectionType.COMPUTE_NODE,
                     value: cluster.computeNodes[0],
                 })}
             </div>
-            <div className="ms-Grid-row ButtonPanel">
-                <div className="ms-Grid-col">
-                    <PrimaryButton text="Create Cluster" />
-                    <DefaultButton text="Show Template" />
-                </div>
-            </div>
+            <ButtonContainer>
+                <PrimaryButton text="Create Cluster" />
+            </ButtonContainer>
         </>
     )
 }
@@ -67,9 +71,13 @@ const mapStateToProps = (state: any) => {
     return { cluster: state.cluster }
 };
 
-const mapDispatchToProps = (dispatch: any):IDispatchProps => {
+const mapDispatchToProps = (dispatch: any): IDispatchProps => {
     return {
-        onEditScheduler: (scheduler: string) => dispatch(editScheduler(scheduler))
+        onEditNode:
+            (node: IClusterNode, type: ClusterNodeType, index: number) =>
+                dispatch(editNode(node, type, index)),
+        onEditScheduler:
+            (scheduler: string) => dispatch(editScheduler(scheduler))
     }
 };
 

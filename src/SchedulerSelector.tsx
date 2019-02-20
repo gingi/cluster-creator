@@ -1,20 +1,14 @@
 import * as React from "react";
+import { IEditorRendererProps } from "./ClusterSectionEditor";
 import ListSelector from "./ListSelector";
 import Schedulers from "./models/Schedulers";
 
-interface ISchedulerSelectorProps {
-    value: string;
-    onChange?: (value: any, oldValue?: any) => void;
-}
-
-export default function SchedulerSelector(props: ISchedulerSelectorProps) {
+export default function SchedulerSelector(props: IEditorRendererProps) {
     const detailRenderer = (item: any) => {
         return `Version ${item.version}`;
     }
     const onSelectionChanged = (index: number) => {
-        if (props.onChange) {
-            props.onChange({ scheduler: Schedulers[index].id });
-        }
+        props.onChange({ scheduler: Schedulers[index].id });
     }
 
     const itemMatcher = (value: string, item: any) => item.id === value;

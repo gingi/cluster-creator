@@ -1,12 +1,18 @@
 import { Panel, PanelType, PrimaryButton } from "office-ui-fabric-react";
 import * as React from "react";
 import { Component, SyntheticEvent } from "react";
+import ButtonContainer from "./layout/ButtonContainer";
 
 export interface IClusterSectionEditorProps {
     isOpen: boolean;
     onDismiss: (event: SyntheticEvent<HTMLElement>) => void;
     onSave: (values: any) => void;
     headerText: string;
+}
+
+export interface IEditorRendererProps {
+    value: any;
+    onChange: (value: any) => void;
 }
 
 export default function createEditor(WrappedEditor: any) {
@@ -26,7 +32,9 @@ export default function createEditor(WrappedEditor: any) {
                     onDismiss={onDismiss}
                     headerText={headerText}>
                     <WrappedEditor onChange={handleChange} {...extraProps} />
-                    <PrimaryButton text="Save" onClick={onSaveEditor}/>
+                    <ButtonContainer>
+                        <PrimaryButton text="Save" onClick={onSaveEditor}/>
+                    </ButtonContainer>
                 </Panel>
             );
         }

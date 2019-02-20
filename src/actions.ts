@@ -1,17 +1,21 @@
-import { INode } from "./models/Cluster";
+import { ClusterNodeType, IClusterNode } from "./models/Cluster";
 
-export const EDIT_SCHEDULER = "EDIT_SCHEDULER";
-export const ADD_NODE = "ADD_NODE";
-export const EDIT_NODE = "EDIT_NODE";
+export enum Actions {
+    EDIT_SCHEDULER,
+    ADD_NODE,
+    EDIT_NODE
+}
 
 export function editScheduler(scheduler: string) {
-    return { type: EDIT_SCHEDULER, scheduler };
+    return { type: Actions.EDIT_SCHEDULER, scheduler };
 }
 
-export function addNode(node: INode) {
-    return { type: ADD_NODE, node };
+export function addNode(node: IClusterNode) {
+    return { type: Actions.ADD_NODE, node };
 }
 
-export function editNode(node: INode) {
-    return { type: EDIT_NODE, node };
+export function editNode(
+    node: IClusterNode, type: ClusterNodeType, index: number
+) {
+    return { index, node, nodeType: type, type: Actions.EDIT_NODE };
 }

@@ -11,16 +11,20 @@ const Defaults = {
     defaultScheduler: Schedulers[0].id
 }
 
-export interface INode {
+export interface IClusterNode {
     machineType: string;
+}
+
+export enum ClusterNodeType {
+    HEAD, COMPUTE
 }
 
 export default class Cluster {
     public name: string;
     public category: string;
     public scheduler: string;
-    public headNodes: INode[];
-    public computeNodes: INode[];
+    public headNodes: IClusterNode[];
+    public computeNodes: IClusterNode[];
 
     constructor() {
         this.scheduler = Defaults.defaultScheduler;

@@ -1,8 +1,9 @@
 import * as React from "react";
+import { IEditorRendererProps } from "./ClusterSectionEditor";
 import ListSelector from "./ListSelector";
 import MachineTypes from "./models/MachineTypes";
 
-export default function NodeEditor(props: any) {
+export default function NodeEditor(props: IEditorRendererProps) {
     const labelRenderer = (nodeType: any) => {
         return nodeType.name;
     };
@@ -11,6 +12,9 @@ export default function NodeEditor(props: any) {
             `${nodeType.cores} vCPUs`,
             `${nodeType.memory} GB RAM`
         ].join(", ");
+    }
+    const onMachineTypeSelectionChange = (index: number) => {
+        props.onChange({ machineType: MachineTypes[index].name });
     }
     const itemMatcher = (value: string, item: any) => item.name === value;
     return (
@@ -22,8 +26,11 @@ export default function NodeEditor(props: any) {
                 detailRenderer={detailRenderer}
                 labelRenderer={labelRenderer}
                 itemMatcher={itemMatcher}
+                onSelectionChanged={onMachineTypeSelectionChange}
             />
+            <h2>Project</h2>
             <h2>Networking</h2>
+
         </>
     );
 }
