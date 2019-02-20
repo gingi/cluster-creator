@@ -1,5 +1,7 @@
 import { DefaultButton, PrimaryButton } from "office-ui-fabric-react";
 import * as React from "react";
+import { connect } from "react-redux";
+import { editScheduler } from "./actions";
 import ClusterSection, { ClusterSectionType } from "./ClusterSection";
 import Cluster from "./models/Cluster";
 import NodeEditor from "./NodeEditor";
@@ -9,19 +11,22 @@ export interface IClusterBuilderProps {
     cluster: Cluster;
 }
 
-export default function ClusterBuilder(props: IClusterBuilderProps) {
-    const { cluster } = props;
-    const handleSave = () => {
-        alert("Saved section!");
-    }
+interface IDispatchProps {
+    onEditScheduler: (scheduler: string) => void;
+}
 
+const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) => {
+    const { cluster, onEditScheduler } = props;
     const makeClusterSection = (args: any) => {
         return (
             <ClusterSection
                 {...args}
-                cluster={cluster}
-                onSave={handleSave} />
+                cluster={cluster} />
         );
+    }
+
+    if (!cluster) {
+        return <h3>No cluster defined!</h3>;
     }
 
     return (
@@ -29,6 +34,7 @@ export default function ClusterBuilder(props: IClusterBuilderProps) {
             <div className="ms-Grid-row">
                 {makeClusterSection({
                     editor: SchedulerSelector,
+                    onEdit: onEditScheduler,
                     type: ClusterSectionType.SCHEDULER,
                     value: cluster.scheduler,
                 })}
@@ -56,3 +62,21 @@ export default function ClusterBuilder(props: IClusterBuilderProps) {
         </>
     )
 }
+
+const mapStateToProps = (state: any) => {
+    return { cluster: state.cluster }
+};
+
+const mapDispatchToProps = (dispatch: any):IDispatchProps => {
+    return {
+        onEditScheduler: (scheduler: string) => dispatch(editScheduler(scheduler))
+    }
+};
+
+
+const ClusterBuilder = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(ClusterBuilderComponent);
+
+export default ClusterBuilder;

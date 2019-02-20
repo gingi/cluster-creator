@@ -5,13 +5,16 @@ import { Component, SyntheticEvent } from "react";
 export interface IClusterSectionEditorProps {
     isOpen: boolean;
     onDismiss: (event: SyntheticEvent<HTMLElement>) => void;
-    onSave: () => void;
+    onSave: (values: any) => void;
     headerText: string;
 }
 
 export default function createEditor(WrappedEditor: any) {
     return class Editor extends Component<IClusterSectionEditorProps> {
-        public state = { changed: false };
+        public state = {
+            changed: false,
+            values: {}
+        };
         public render() {
             const { isOpen, onDismiss, headerText, ...extraProps } = this.props;
             const onSaveEditor = this.onSaveEditor.bind(this);
@@ -29,12 +32,16 @@ export default function createEditor(WrappedEditor: any) {
         }
 
         private onSaveEditor() {
-            alert("Saved " + this.state.changed);
-            this.props.onSave();
+            if (this.state.changed) {
+                this.props.onSave(this.state.values);
+            }
         }
 
-        private handleChange() {
-            this.setState({ changed: true });
+        private handleChange(value: any) {
+            this.setState({
+                changed: true,
+                values: Object.assign({}, this.state.values, value)
+            });
         }
     }
 }

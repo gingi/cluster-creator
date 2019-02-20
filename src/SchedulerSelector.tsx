@@ -3,8 +3,8 @@ import ListSelector from "./ListSelector";
 import Schedulers from "./models/Schedulers";
 
 interface ISchedulerSelectorProps {
-    value: number;
-    onChange?: (value: any) => void;
+    value: string;
+    onChange?: (value: any, oldValue?: any) => void;
 }
 
 export default function SchedulerSelector(props: ISchedulerSelectorProps) {
@@ -13,7 +13,7 @@ export default function SchedulerSelector(props: ISchedulerSelectorProps) {
     }
     const onSelectionChanged = (index: number) => {
         if (props.onChange) {
-            props.onChange(index);
+            props.onChange({ scheduler: Schedulers[index].id });
         }
     }
 

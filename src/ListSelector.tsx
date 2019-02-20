@@ -95,7 +95,9 @@ extends React.Component<IListSelectorProps, IListSelectorState> {
         this.forceUpdate();
         if (this.props.onSelectionChanged) {
             const index = this.state.selection.getSelectedIndices()[0];
-            this.props.onSelectionChanged(index);
+            if (index !== undefined) {
+                this.props.onSelectionChanged(index);
+            }
         }
     }
 

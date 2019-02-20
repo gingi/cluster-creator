@@ -19,7 +19,7 @@ export interface IClusterSectionProps {
     type: ClusterSectionType;
     value: any;
     details?: string[];
-    onSave: () => void;
+    onEdit: (values: any) => void;
     editor?: any;
 }
 
@@ -48,8 +48,8 @@ export default function ClusterSection(props: IClusterSectionProps) {
     const details = helper.renderDetails(props.value);
     const showEditPanel = () => toggleEditPanel(true);
     const hideEditPanel = () => toggleEditPanel(false);
-    const saveAndCloseEditPanel = () => {
-        props.onSave();
+    const saveAndCloseEditPanel = (values: any) => {
+        props.onEdit(values);
         hideEditPanel();
     };
 
@@ -99,19 +99,26 @@ abstract class SectionHelper {
 
 // tslint:disable-next-line: max-classes-per-file
 class SchedulerSectionHelper extends SectionHelper {
-    private static findScheduler(name: string) {
-        return Schedulers.filter(s => s.name === name)[0];
+    private static findScheduler(id: string) {
+        return Schedulers.filter(s => s.id === id)[0];
     }
     public name() {
         return "Scheduler";
     }
-    public renderDetails(name: string): string[] {
-        const scheduler = SchedulerSectionHelper.findScheduler(name);
+    public renderDetails(id: string): string[] {
+        const scheduler = SchedulerSectionHelper.findScheduler(id);
         if (scheduler) {
             return [ scheduler.label, `Version ${scheduler.version}` ];
         } else {
             return [];
         }
+    }
+    public renderValue(id: string) {
+        const scheduler = SchedulerSectionHelper.findScheduler(id);
+        if (scheduler) {
+            return scheduler.name;
+        }
+        return id;
     }
 }
 

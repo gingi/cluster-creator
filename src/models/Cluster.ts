@@ -8,7 +8,7 @@ const Defaults = {
     defaultHeadNodes: [
         { machineType: MachineTypes[2].name }
     ],
-    defaultScheduler: Schedulers[0].name,
+    defaultScheduler: Schedulers[0].id
 }
 
 export interface INode {
