@@ -1,5 +1,6 @@
-import { Check, ISelection, Selection, SelectionMode, SelectionZone } from "office-ui-fabric-react";
+import { Check, List, Selection, SelectionMode, SelectionZone } from "office-ui-fabric-react";
 import * as React from "react";
+import { useEffect, useState } from "react";
 import "./ListSelector.css";
 
 type IRenderer = (item: any) => string;
@@ -13,33 +14,26 @@ export interface IListSelectorProps {
     onSelectionChanged?: (index: number) => void;
 }
 
-interface IListSelectorState {
-    selection: ISelection;
-}
-
 interface IListSelectorCellProps {
     item: any;
-    selection: ISelection;
+    isSelected: boolean;
     index: number;
     detailRenderer?: IRenderer;
     labelRenderer?: IRenderer;
 }
 
-const ListSelectorCell:
-    React.StatelessComponent<IListSelectorCellProps> =
-(props: IListSelectorCellProps) => {
+const ListSelectorCell = (props: IListSelectorCellProps) => {
     const detail = props.detailRenderer ?
         props.detailRenderer(props.item) : null;
     const label = props.labelRenderer ?
         props.labelRenderer(props.item) : props.item.label;
-    const isSelected = props.selection.isIndexSelected(props.index);
     return (
         <div className="List-itemCell"
              data-selection-index={props.index}
              data-is-focusable={true}>
             <div className="List-itemCell-checkbox"
                  data-selection-toggle={true}>
-                <Check checked={isSelected}/>
+                <Check checked={props.isSelected}/>
             </div>
             <div className="List-itemCell-content" data-selection-select={true}>
                 <div className="List-itemCell-header">{label}</div>
@@ -51,68 +45,75 @@ const ListSelectorCell:
     );
 }
 
-export default class ListSelector
-extends React.Component<IListSelectorProps, IListSelectorState> {
-    private hasMounted = false;
-
-    constructor(props: IListSelectorProps) {
-        super(props);
-        this.onSelectionChanged = this.onSelectionChanged.bind(this);
-        this.state = {
-            selection: new Selection({
-                onSelectionChanged: this.onSelectionChanged,
-                selectionMode: SelectionMode.single
-            })
-        };
-
-        this.state.selection.setItems(props.items, false);
-        const selectedIndex = this.getInitialIndex(props);
-        this.state.selection.setIndexSelected(selectedIndex, true, true);
-    }
-    public componentDidMount() {
-        this.hasMounted = true;
-    }
-    public render() {
-        const { selection } = this.state;
-        return (
-            <SelectionZone selection={selection}>
-                {this.props.items.map((item, index) =>
-                    <ListSelectorCell
-                        key={index}
-                        item={item}
-                        index={index}
-                        selection={selection}
-                        detailRenderer={this.props.detailRenderer}
-                        labelRenderer={this.props.labelRenderer}/>
-                )}
-            </SelectionZone>
-        );
-    }
-    private onSelectionChanged() {
-        if (!this.hasMounted) {
-            return;
-        }
-        this.forceUpdate();
-        if (this.props.onSelectionChanged) {
-            const index = this.state.selection.getSelectedIndices()[0];
-            if (index !== undefined) {
-                this.props.onSelectionChanged(index);
-            }
-        }
-    }
-
-    private getInitialIndex(props: any) {
-        const { initialValue, itemMatcher, items } = props;
-        if (!initialValue) {
-            return 0;
-        }
-        const matches = itemMatcher ? itemMatcher :
-            (value: string, item: any) => value === item;
-        for (let i = 0; i < items.length; i++) {
-            if (matches(initialValue, items[i])) {
-                return i;
-            }
-        }
+const getInitialIndex = (props: any) => {
+    const { initialValue, itemMatcher, items } = props;
+    if (!initialValue) {
         return 0;
     }
+    const matches = itemMatcher ? itemMatcher :
+        (value: string, item: any) => value === item;
+    for (let i = 0; i < items.length; i++) {
+        if (matches(initialValue, items[i])) {
+            return i;
+        }
+    }
+    return 0;
 }
+
+const ListSelector = (props: IListSelectorProps) => {
+    let hasMounted = false;
+    let listComponent: any;
+
+    const [ selectedIndex, setSelectedIndex ] =
+        useState(getInitialIndex(props));
+
+    const onSelectionChanged = () => {
+        if (!hasMounted) {
+            return;
+        }
+        const index = selection.getSelectedIndices()[0];
+        if (props.onSelectionChanged) {
+            props.onSelectionChanged(index);
+            if (listComponent) {
+                listComponent.forceUpdate();
+            }
+        }
+        setSelectedIndex(index);
+    }
+
+    const selection = new Selection({
+        onSelectionChanged,
+        selectionMode: SelectionMode.single
+    })
+    selection.setItems(props.items, false);
+    selection.setIndexSelected(selectedIndex, true, true);
+
+    useEffect(() => { hasMounted = true; });
+
+    const onRenderCell = (item: any, index: number) => {
+        const isSelected = selectedIndex === index;
+        return (
+            <ListSelectorCell item={item}
+                isSelected={isSelected}
+                index={index}
+                detailRenderer={props.detailRenderer}
+                labelRenderer={props.labelRenderer}
+             />
+        )
+    };
+    const listRef = (ref: any) => { listComponent = ref; }
+
+    return (
+        <SelectionZone selection={selection}>
+            <div className="ListSelector-container" data-is-scrollable={true}>
+                <List
+                    items={props.items}
+                    onRenderCell={onRenderCell}
+                    componentRef={listRef}
+                />
+            </div>
+        </SelectionZone>
+    );
+}
+
+export default ListSelector;
