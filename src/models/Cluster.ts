@@ -16,7 +16,8 @@ export interface IClusterNode {
 }
 
 export enum ClusterNodeType {
-    HEAD, COMPUTE
+    HEAD = "HEAD",
+    COMPUTE = "COMPUTE"
 }
 
 export default class Cluster {

@@ -11,7 +11,8 @@ export default function SchedulerSelector(props: IEditorRendererProps) {
         props.onChange({ scheduler: Schedulers[index].id });
     }
 
-    const itemMatcher = (value: string, item: any) => item.id === value;
+    const itemMatcher = (value: string, item: any) =>
+        item.id.toLowerCase() === value.toLowerCase();
 
     return (
         <ListSelector

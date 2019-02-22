@@ -1,0 +1,21 @@
+.ClusterParameter-value {
+    font-weight: bold;
+}
+.ClusterParameter-edit {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 1em;
+}
+.ClusterParameter {
+    display: flex;
+    padding: 1em;
+    position: relative;
+    min-height: 80px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+.ClusterParameter-icon {
+    font-size: 400%;
+    margin-right: 20px;
+}

@@ -17,7 +17,7 @@ export default class Layout extends React.Component<{title: string}, {}> {
                     <Header title={this.props.title} />
                 </div>
                 <div className="ms-Grid-row">
-                    <div className="App-content ms-Grid-col ms-lg12">
+                    <div className="App-content ms-Grid-col ms-lg12 ms-md12 ms-sm12">
                         {this.props.children}
                     </div>
                 </div>

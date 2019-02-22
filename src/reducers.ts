@@ -24,7 +24,7 @@ const reducers = [
                 });
             case Actions.EDIT_NODE:
                 const nType = nodeType(action["nodeType"]);
-                const nState = Object.assign({}, state, {
+                return Object.assign({}, state, {
                     cluster: {
                         ...state.cluster,
                         [nType]: state.cluster[nType].map(
@@ -38,7 +38,14 @@ const reducers = [
                         )
                     }
                 });
-                return nState;
+            case Actions.ADD_NODE:
+                const nType2 = nodeType(action["nodeType"]);
+                return Object.assign({}, state, {
+                    cluster: {
+                        ...state.cluster,
+                        [nType2]: state.cluster[nType2].concat(action["node"])
+                    }
+                });
             default:
                 return state;
         }

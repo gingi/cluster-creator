@@ -1,7 +1,7 @@
 import { PrimaryButton } from "office-ui-fabric-react";
 import * as React from "react";
 import { connect } from "react-redux";
-import { editNode, editScheduler } from "./actions";
+import { addNode, editNode, editScheduler } from "./actions";
 import ClusterSection, { ClusterSectionType } from "./ClusterSection";
 import ButtonContainer from "./layout/ButtonContainer";
 import Cluster, { ClusterNodeType, IClusterNode } from "./models/Cluster";
@@ -13,13 +13,14 @@ export interface IClusterBuilderProps {
 }
 
 interface IDispatchProps {
+    onAddNode: (node: IClusterNode, type: ClusterNodeType) => void;
     onEditScheduler: (scheduler: string) => void;
     onEditNode:
         (node: IClusterNode, type: ClusterNodeType, index: number) => void;
 }
 
 const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) => {
-    const { cluster, onEditScheduler, onEditNode } = props;
+    const { cluster, onEditScheduler, onEditNode, onAddNode } = props;
     const makeClusterSection = (args: any) => {
         return <ClusterSection {...args} cluster={cluster} />;
     }
@@ -28,42 +29,57 @@ const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) =
         return <h3>No cluster defined!</h3>;
     }
 
-    const onEditHeadNode =
-        (node: IClusterNode) => onEditNode(node, ClusterNodeType.HEAD, 0);
+    const onEditHeadNode = (node: IClusterNode, index: number) =>
+        onEditNode(node, ClusterNodeType.HEAD, index);
+    
+    const onAddHeadNode = (node: IClusterNode) => {
+        onAddNode(node, ClusterNodeType.HEAD);
+    }
 
-    const onEditComputeNode =
-        (node: IClusterNode) => onEditNode(node, ClusterNodeType.COMPUTE, 0);
+    const onEditComputeNode = (node: IClusterNode, index: number) =>
+        onEditNode(node, ClusterNodeType.COMPUTE, index);
 
+    const onAddComputeNode = (node: IClusterNode) => {
+        onAddNode(node, ClusterNodeType.COMPUTE);
+    }
+    
     return (
-        <>
-            <div className="ms-Grid-row">
+        <div className="ms-Grid">
+            <div>
                 {makeClusterSection({
                     editor: SchedulerSelector,
                     onEdit: onEditScheduler,
+                    parameters: [cluster.scheduler],
                     type: ClusterSectionType.SCHEDULER,
-                    value: cluster.scheduler,
                 })}
             </div>
-            <div className="ms-Grid-row">
+            <div>
                 {makeClusterSection({
                     editor: NodeEditor,
+                    multiple: true,
+                    onAdd: onAddHeadNode,
                     onEdit: onEditHeadNode,
+                    parameters: cluster.headNodes,
                     type: ClusterSectionType.HEAD_NODE,
-                    value: cluster.headNodes[0],
                 })}
             </div>
-            <div className="ms-Grid-row">
+            <div>
                 {makeClusterSection({
                     editor: NodeEditor,
+                    multiple: true,
+                    onAdd: onAddComputeNode,
                     onEdit: onEditComputeNode,
+                    parameters: cluster.computeNodes,
                     type: ClusterSectionType.COMPUTE_NODE,
-                    value: cluster.computeNodes[0],
                 })}
             </div>
             <ButtonContainer>
                 <PrimaryButton text="Create Cluster" />
             </ButtonContainer>
-        </>
+            {/*
+            <pre>{JSON.stringify(cluster)}</pre>
+            */}
+        </div>
     )
 }
 
@@ -73,6 +89,9 @@ const mapStateToProps = (state: any) => {
 
 const mapDispatchToProps = (dispatch: any): IDispatchProps => {
     return {
+        onAddNode:
+            (node: IClusterNode, type: ClusterNodeType) =>
+                dispatch(addNode(node, type)),
         onEditNode:
             (node: IClusterNode, type: ClusterNodeType, index: number) =>
                 dispatch(editNode(node, type, index)),
@@ -80,7 +99,6 @@ const mapDispatchToProps = (dispatch: any): IDispatchProps => {
             (scheduler: string) => dispatch(editScheduler(scheduler))
     }
 };
-
 
 const ClusterBuilder = connect(
     mapStateToProps,

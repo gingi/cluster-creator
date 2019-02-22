@@ -2,22 +2,20 @@
     font-size: 1.5em;
     font-weight: 200;
 }
-.ClusterSection-value {
-    font-weight: bold;
+.ClusterSection-addParameter {
+    height: 100px;
 }
-.ClusterSection-edit {
-    position: absolute;
-    right: 0;
-    top: 0;
-    padding: 1em;
+.ClusterSection-addParameter::before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
 }
-.ClusterSection-container {
-    display: flex;
-    padding: 1em;
-    position: relative;
-    min-height: 80px;
+.ClusterSection-addParameter > button {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 5px;
 }
-.ClusterSection-icon {
-    font-size: 400%;
-    margin-right: 20px;
+.ClusterSection-addParameter .ms-Button-icon {
+    font-size: 200%;
 }
