@@ -9,6 +9,7 @@ export default function NodeEditor(props: IEditorRendererProps) {
     };
     const detailRenderer = (nodeType: any) => {
         return [
+            `${nodeType.type}`,
             `${nodeType.cores} vCPUs`,
             `${nodeType.memory} GB RAM`
         ].join(", ");
@@ -27,6 +28,8 @@ export default function NodeEditor(props: IEditorRendererProps) {
                 labelRenderer={labelRenderer}
                 itemMatcher={itemMatcher}
                 onSelectionChanged={onMachineTypeSelectionChange}
+                height={400}
+                filter={true}
             />
             <h2>Project</h2>
             <h2>Networking</h2>

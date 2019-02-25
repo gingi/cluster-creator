@@ -8,6 +8,7 @@ import "./App.css";
 import ClusterBuilder from "./ClusterBuilder";
 import Layout from "./layout/Layout";
 import ListSelector from "./ListSelector";
+import MachineTypes from "./models/MachineTypes";
 
 initializeIcons();
 
@@ -28,22 +29,23 @@ const Main = () => (<>
 </>);
 
 const ListExample = () => {
-    const [ selected, setSelected ] = React.useState(6);
-    const items = Array.from(Array(500).keys()).map(num => {
-        return { label: `Value ${num}` }
-    });
-
-
+    const [ selected, setSelected ] = React.useState(3);
+    const items = MachineTypes;
+    const labelRenderer = (item: any) => item.name;
+    const detailRenderer = (item: any) =>
+        `${item.type}, ${item.cores} cores, ${item.memory} GB RAM`;
     const onSelectionChanged = (index: number) => setSelected(index);
     return (<>
-        <div>Selected value <b>{items[selected].label}</b></div>
-        <div style={{ height: 400, overflow: "scroll" }}>
-            <ListSelector
-                items={items}
-                initialValue={items[selected]}
-                onSelectionChanged={onSelectionChanged}
-            />
-        </div>
+        <div>Selected value <b>{items[selected].name}</b></div>
+        <ListSelector
+            height={400}
+            items={items}
+            initialValue={items[selected]}
+            labelRenderer={labelRenderer}
+            detailRenderer={detailRenderer}
+            onSelectionChanged={onSelectionChanged}
+            filter={true}
+        />
     </>);
 }
 

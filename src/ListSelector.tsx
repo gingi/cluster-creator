@@ -1,4 +1,4 @@
-import { Check, List, Selection, SelectionMode, SelectionZone } from "office-ui-fabric-react";
+import { Check, List, Selection, SelectionMode, SelectionZone, TextField } from "office-ui-fabric-react";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import "./ListSelector.css";
@@ -12,21 +12,19 @@ export interface IListSelectorProps {
     initialValue?: any;
     itemMatcher?: (value: string, item: any) => boolean;
     onSelectionChanged?: (index: number) => void;
+    height?: number;
+    filter?: boolean;
 }
 
 interface IListSelectorCellProps {
     item: any;
     isSelected: boolean;
     index: number;
-    detailRenderer?: IRenderer;
-    labelRenderer?: IRenderer;
+    detail: string | undefined;
+    label: string;
 }
 
 const ListSelectorCell = (props: IListSelectorCellProps) => {
-    const detail = props.detailRenderer ?
-        props.detailRenderer(props.item) : null;
-    const label = props.labelRenderer ?
-        props.labelRenderer(props.item) : props.item.label;
     return (
         <div className="List-itemCell"
              data-selection-index={props.index}
@@ -36,9 +34,9 @@ const ListSelectorCell = (props: IListSelectorCellProps) => {
                 <Check checked={props.isSelected}/>
             </div>
             <div className="List-itemCell-content" data-selection-select={true}>
-                <div className="List-itemCell-header">{label}</div>
-                {detail &&
-                    <div className="List-itemCell-detail">{detail}</div>
+                <div className="List-itemCell-header">{props.label}</div>
+                {props.detail &&
+                    <div className="List-itemCell-detail">{props.detail}</div>
                 }
             </div>
         </div>
@@ -60,54 +58,110 @@ const getInitialIndex = (props: any) => {
     return 0;
 }
 
+interface IWrappedItem {
+    key: number;
+    originalItem: any;
+}
+
+const withKey = (items: any[]): IWrappedItem[] =>
+    items.map((item, index) => {
+        return { originalItem: item, key: index };
+    });
+
 const ListSelector = (props: IListSelectorProps) => {
+    const {
+        height = document.body.clientHeight,
+        filter = false,
+        labelRenderer = (item: any) => item.label,
+        detailRenderer = () => undefined
+    } = props;
     let hasMounted = false;
     let listComponent: any;
+    const initialItems = withKey(props.items);
 
-    const [ selectedIndex, setSelectedIndex ] =
+    const [ selectedKey, setSelectedKey ] =
         useState(getInitialIndex(props));
+    const [ shownItems, setShownItems ] = useState(initialItems);
+    const [ , setFilterText ] = useState("");
 
     const onSelectionChanged = () => {
         if (!hasMounted) {
             return;
         }
-        const index = selection.getSelectedIndices()[0];
-        if (props.onSelectionChanged) {
-            props.onSelectionChanged(index);
-            if (listComponent) {
-                listComponent.forceUpdate();
-            }
+        const selected = selection.getSelection()[0] as IWrappedItem;
+        if (props.onSelectionChanged && selected) {
+            props.onSelectionChanged(selected.key);
+            setSelectedKey(selected.key);
         }
-        setSelectedIndex(index);
-    }
+        if (listComponent) {
+            listComponent.forceUpdate();
+        }
+}
 
     const selection = new Selection({
         onSelectionChanged,
         selectionMode: SelectionMode.single
-    })
-    selection.setItems(props.items, false);
-    selection.setIndexSelected(selectedIndex, true, true);
+    });
 
+    selection.setItems(shownItems, false);
+    selection.setIndexSelected(selectedKey, true, true);
     useEffect(() => { hasMounted = true; });
 
-    const onRenderCell = (item: any, index: number) => {
-        const isSelected = selectedIndex === index;
+    const onRenderCell = (wrappedItem: IWrappedItem, index: number) => {
+        const isSelected = selectedKey === wrappedItem.key;
+        const item = wrappedItem.originalItem;
         return (
-            <ListSelectorCell item={item}
+            <ListSelectorCell
+                item={item}
                 isSelected={isSelected}
                 index={index}
-                detailRenderer={props.detailRenderer}
-                labelRenderer={props.labelRenderer}
-             />
+                detail={detailRenderer(item)}
+                label={labelRenderer(item)}
+            />
         )
     };
     const listRef = (ref: any) => { listComponent = ref; }
 
+    const onFilterChanged = (text: string) => {
+        if (text) {
+            setFilterText(text);
+            const lcText = text.toLowerCase();
+            const filtered = initialItems.filter(wrapper => {
+                const item = wrapper.originalItem;
+                if (labelRenderer(item).toLowerCase().indexOf(lcText) >= 0) {
+                    return true;
+                }
+                const details = detailRenderer(item);
+                if (details) {
+                    return details.toLowerCase().indexOf(lcText) >= 0;
+                }
+                return false;
+            });
+            setShownItems(filtered);
+            // selection.setItems(filtered, true);
+        } else {
+            setShownItems(initialItems);
+            // selection.setItems(initialItems, true);
+        }
+    };
+
+    const statusLabel = filter ?
+        (<TextField
+            label={
+                `Showing ${shownItems.length} of ${initialItems.length} items`
+            }
+            onBeforeChange={onFilterChanged}
+        />)
+        : <div>Showing {initialItems.length} items</div>
+
     return (
         <SelectionZone selection={selection}>
-            <div className="ListSelector-container" data-is-scrollable={true}>
+            {statusLabel}
+            <div style={{ height, overflow: "auto" }}
+                 className="ListSelector-container"
+                 data-is-scrollable={true}>
                 <List
-                    items={props.items}
+                    items={shownItems}
                     onRenderCell={onRenderCell}
                     componentRef={listRef}
                 />
