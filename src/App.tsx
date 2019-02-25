@@ -9,6 +9,7 @@ import ClusterBuilder from "./ClusterBuilder";
 import Layout from "./layout/Layout";
 import ListSelector from "./ListSelector";
 import MachineTypes from "./models/MachineTypes";
+import ProjectSelector from "./ProjectSelector";
 
 initializeIcons();
 
@@ -18,6 +19,7 @@ const App = () => (
             <Layout title="Azure CycleCloud">
                 <Route exact={true} path="/" component={Main}/>
                 <Route path="/list" component={ListExample}/>
+                <Route path="/projects" component={ProjectExample}/>
             </Layout>
         </Customizer>                        
     </Router>
@@ -47,6 +49,10 @@ const ListExample = () => {
             filter={true}
         />
     </>);
+}
+
+const ProjectExample = () => {
+    return (<ProjectSelector />);
 }
 
 export default App;
