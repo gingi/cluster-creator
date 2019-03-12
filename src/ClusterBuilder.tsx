@@ -3,23 +3,25 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { addNode, editNode, editScheduler } from "./actions";
 import ClusterSection, { ClusterSectionType } from "./ClusterSection";
+import { IClusterState } from "./ClusterState";
 import ButtonContainer from "./layout/ButtonContainer";
-import Cluster, { ClusterNodeType, IClusterNode } from "./models/Cluster";
-import NodeEditor from "./NodeEditor";
+import { ClusterNodeType, IClusterNode } from "./models/Cluster";
 import SchedulerSelector from "./SchedulerSelector";
+import { SubnetPanel } from "./SubnetPanel";
 
 export interface IClusterBuilderProps {
-    cluster: Cluster;
+    cluster: IClusterState;
 }
 
 interface IDispatchProps {
     onAddNode: (node: IClusterNode, type: ClusterNodeType) => void;
     onEditScheduler: (scheduler: string) => void;
     onEditNode:
-        (node: IClusterNode, type: ClusterNodeType, index: number) => void;
+        (node: IClusterNode, type: ClusterNodeType, stateId: string) => void;
 }
 
-const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) => {
+const ClusterBuilderComponent =
+(props: IClusterBuilderProps & IDispatchProps) => {
     const { cluster, onEditScheduler, onEditNode, onAddNode } = props;
     const makeClusterSection = (args: any) => {
         return <ClusterSection {...args} cluster={cluster} />;
@@ -29,50 +31,28 @@ const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) =
         return <h3>No cluster defined!</h3>;
     }
 
-    const onEditHeadNode = (node: IClusterNode, index: number) =>
-        onEditNode(node, ClusterNodeType.HEAD, index);
-    
-    const onAddHeadNode = (node: IClusterNode) => {
-        onAddNode(node, ClusterNodeType.HEAD);
-    }
-
-    const onEditComputeNode = (node: IClusterNode, index: number) =>
-        onEditNode(node, ClusterNodeType.COMPUTE, index);
-
-    const onAddComputeNode = (node: IClusterNode) => {
-        onAddNode(node, ClusterNodeType.COMPUTE);
-    }
-    
     return (
         <div className="ms-Grid">
             <div>
                 {makeClusterSection({
+                    cluster,
                     editor: SchedulerSelector,
                     onEdit: onEditScheduler,
                     parameters: [cluster.scheduler],
                     type: ClusterSectionType.SCHEDULER,
                 })}
             </div>
-            <div>
-                {makeClusterSection({
-                    editor: NodeEditor,
-                    multiple: true,
-                    onAdd: onAddHeadNode,
-                    onEdit: onEditHeadNode,
-                    parameters: cluster.headNodes,
-                    type: ClusterSectionType.HEAD_NODE,
-                })}
-            </div>
-            <div>
-                {makeClusterSection({
-                    editor: NodeEditor,
-                    multiple: true,
-                    onAdd: onAddComputeNode,
-                    onEdit: onEditComputeNode,
-                    parameters: cluster.computeNodes,
-                    type: ClusterSectionType.COMPUTE_NODE,
-                })}
-            </div>
+            {cluster.subnets.map((subnet, i) =>
+                <SubnetPanel
+                    cluster={cluster}
+                    subnet={subnet}
+                    key={i}
+                    subnetIndex={i}
+                    onAddNode={onAddNode}
+                    onEditNode={onEditNode}
+                    makeClusterSection={makeClusterSection}
+                />
+            )}
             <ButtonContainer>
                 <PrimaryButton text="Create Cluster" />
             </ButtonContainer>
@@ -84,7 +64,7 @@ const ClusterBuilderComponent = (props: IClusterBuilderProps & IDispatchProps) =
 }
 
 const mapStateToProps = (state: any) => {
-    return { cluster: state.cluster }
+    return { cluster: state }
 };
 
 const mapDispatchToProps = (dispatch: any): IDispatchProps => {
@@ -93,8 +73,8 @@ const mapDispatchToProps = (dispatch: any): IDispatchProps => {
             (node: IClusterNode, type: ClusterNodeType) =>
                 dispatch(addNode(node, type)),
         onEditNode:
-            (node: IClusterNode, type: ClusterNodeType, index: number) =>
-                dispatch(editNode(node, type, index)),
+            (node: IClusterNode, type: ClusterNodeType, stateId: string) =>
+                dispatch(editNode(node, type, stateId)),
         onEditScheduler:
             (scheduler: string) => dispatch(editScheduler(scheduler))
     }

@@ -1,15 +1,13 @@
 import { Action } from "redux";
 import { Actions } from "./actions";
-import Cluster, { ClusterNodeType, IClusterNode } from "./models/Cluster";
+import { convertToState, IClusterState, makeStateNode } from "./ClusterState";
+import { createCluster } from "./models/Cluster";
 
-const initialState = { cluster: new Cluster() };
-
-const nodeType = (type: ClusterNodeType): string => {
-    switch (type) {
-        case ClusterNodeType.COMPUTE: return "computeNodes";
-        case ClusterNodeType.HEAD: return "headNodes";
-    }
+const createClusterState = (): IClusterState => {
+    return convertToState(createCluster());
 }
+
+const initialState = createClusterState();
 
 // tslint:disable: no-string-literal
 const reducers = [
@@ -17,34 +15,25 @@ const reducers = [
         switch (action.type) {
             case Actions.EDIT_SCHEDULER:
                 return Object.assign({}, state, {
-                    cluster: {
-                        ...state.cluster,
-                        ...action["scheduler"]
-                    }
+                    ...action["scheduler"]
                 });
             case Actions.EDIT_NODE:
-                const nType = nodeType(action["nodeType"]);
                 return Object.assign({}, state, {
-                    cluster: {
-                        ...state.cluster,
-                        [nType]: state.cluster[nType].map(
-                            (node: IClusterNode, index: number) => {
-                                if (index === action["index"]) {
-                                    return Object.assign({}, node,
-                                        action["node"]);
-                                }
-                                return node;
-                            }
-                        )
-                    }
-                });
+                    nodes: state.nodes.map((node: any) => 
+                        (node.stateId === action["stateId"] &&
+                            node.type === action["nodeType"] &&
+                            node.subnet === "0") ?
+                            Object.assign({}, node, action["node"]) :
+                            node)
+                    });
             case Actions.ADD_NODE:
-                const nType2 = nodeType(action["nodeType"]);
+                const count = state.nodes.filter(node =>
+                    node.subnet === "0" && node.type === action["nodeType"]
+                ).length;
                 return Object.assign({}, state, {
-                    cluster: {
-                        ...state.cluster,
-                        [nType2]: state.cluster[nType2].concat(action["node"])
-                    }
+                    nodes: state.nodes.concat(makeStateNode(
+                        action["node"], action["nodeType"], "0", count
+                    ))
                 });
             default:
                 return state;

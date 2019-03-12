@@ -1,14 +1,15 @@
 import MachineTypes from "./MachineTypes";
 import Schedulers from "./Schedulers";
+import Subnet from "./Subnet";
 
 const Defaults = {
-    defaultComputNodes: [
+    nodeArrays: [
         { machineType: MachineTypes[1].name }
     ],
-    defaultHeadNodes: [
+    nodes: [
         { machineType: MachineTypes[2].name }
     ],
-    defaultScheduler: Schedulers[0].id
+    scheduler: Schedulers[0].id
 }
 
 export interface IClusterNode {
@@ -16,20 +17,27 @@ export interface IClusterNode {
 }
 
 export enum ClusterNodeType {
-    HEAD = "HEAD",
-    COMPUTE = "COMPUTE"
+    NODE = "NODE",
+    NODE_ARRAY = "NODE_ARRAY"
+}
+
+export interface ISubnet {
+    name: string;
 }
 
 export default class Cluster {
     public name: string;
     public category: string;
     public scheduler: string;
-    public headNodes: IClusterNode[];
-    public computeNodes: IClusterNode[];
+    public subnets: ISubnet[] = [];
+}
 
-    constructor() {
-        this.scheduler = Defaults.defaultScheduler;
-        this.headNodes = Defaults.defaultHeadNodes;
-        this.computeNodes = Defaults.defaultComputNodes;
-    }
+export const createCluster = () => {
+    const cluster = new Cluster();
+    const subnet = new Subnet("");
+    cluster.scheduler = Defaults.scheduler;
+    Defaults.nodes.forEach(node => subnet.nodes.push(node));
+    Defaults.nodeArrays.forEach(node => subnet.nodeArrays.push(node));
+    cluster.subnets.push(subnet);
+    return cluster;
 }

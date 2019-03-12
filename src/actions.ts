@@ -15,6 +15,6 @@ export function addNode(node: IClusterNode, type: ClusterNodeType) {
 }
 
 export function
-editNode(node: IClusterNode, type: ClusterNodeType, index: number) {
-    return { index, node, nodeType: type, type: Actions.EDIT_NODE };
+editNode(node: IClusterNode, type: ClusterNodeType, stateId: string) {
+    return { stateId, node, nodeType: type, type: Actions.EDIT_NODE };
 }

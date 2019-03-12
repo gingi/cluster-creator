@@ -10,8 +10,8 @@ import Schedulers from "./models/Schedulers";
 
 export enum ClusterSectionType {
     SCHEDULER = "Scheduler",
-    HEAD_NODE = "Head Node",
-    COMPUTE_NODE = "Compute Node"
+    NODE = "Node",
+    NODE_ARRAY = "Node Array"
 }
 
 export interface IClusterSectionProps {
@@ -31,10 +31,10 @@ function getSectionHelper(props: IClusterSectionProps): SectionHelper<any> {
         case ClusterSectionType.SCHEDULER:
             section = new SchedulerSectionHelper(props);
             break;
-        case ClusterSectionType.HEAD_NODE:
+        case ClusterSectionType.NODE:
             section = new NodeSectionHelper(props, "TVMonitor");
             break;
-        case ClusterSectionType.COMPUTE_NODE:
+        case ClusterSectionType.NODE_ARRAY:
             section = new NodeSectionHelper(props, "Stack");
             break;
         default:
